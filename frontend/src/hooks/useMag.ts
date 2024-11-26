@@ -1,11 +1,11 @@
 import { useReadContract, useWriteContract } from "wagmi";
-import { parseEther, zeroAddress } from "viem";
+import { parseEther } from "viem";
 import { magTokenABI } from "../abi/magTokenABI";
-
-export const MAG_TOKEN_ADDRESS_ETH: `0x${string}` =
-  "0x71da932ccda723ba3ab730c976bc66daaf9c598c";
-export const MAG_TOKEN_ADDRESS_BASE: `0x${string}` = zeroAddress;
-export const MAG_BRIDGE_ADDRESS: `0x${string}` = zeroAddress;
+import {
+  SOURCE_TOKEN_ADDRESS,
+  DESTINATION_TOKEN_ADDRESS,
+  SOURCE_CHAIN,
+} from "../constants";
 
 /**
  * Custom hook for managing token operations with dynamic chain selection
@@ -16,14 +16,8 @@ export const MAG_BRIDGE_ADDRESS: `0x${string}` = zeroAddress;
 export function useMagToken(address?: string, chainId?: number) {
   // Select the appropriate token address based on the chainId passed as an argument
   const MAG_TOKEN_ADDRESS =
-    chainId === 8453 ? MAG_TOKEN_ADDRESS_BASE : MAG_TOKEN_ADDRESS_ETH;
-
-  console.info(
-    "[useMagToken] Initializing with address:",
-    address,
-    "on chainId:",
-    chainId,
-  );
+    chainId === SOURCE_CHAIN ? SOURCE_TOKEN_ADDRESS : DESTINATION_TOKEN_ADDRESS;
+  console.log(MAG_TOKEN_ADDRESS);
 
   // Balance of Token
   const { data: balance } = useReadContract({
@@ -57,7 +51,6 @@ export function useMagToken(address?: string, chainId?: number) {
   // Approve Token
   const { writeContractAsync: approve } = useWriteContract();
   const handleApprove = async (amount: string, spender: `0x${string}`) => {
-    console.info("[useMagToken] Initiating approve:", { amount, spender });
     try {
       await approve({
         address: MAG_TOKEN_ADDRESS,

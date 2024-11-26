@@ -5,7 +5,7 @@ import { Coins, ArrowRightLeft } from "lucide-react";
 import { ConnectKitButton } from "connectkit";
 import { useMagToken } from "./hooks/useMag";
 import { useBridge } from "./hooks/useBridge";
-//import { useBridge } from "../hooks/useBridge"; // Assuming you have a hook for bridge operations
+import { SOURCE_CHAIN, DESTINATION_CHAIN } from "./constants";
 
 const App = () => {
   // Wagmi hooks
@@ -76,16 +76,17 @@ const App = () => {
           <div className="bg-white/30 backdrop-blur-lg rounded-2xl p-8 border border-[#FF7777]/20 transition-all duration-300 shadow-xl">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-semibold text-gray-800">
-                {chainId === 1 ? "Bridge to Base" : "Bridge Back to Ethereum"}
+                {chainId === SOURCE_CHAIN
+                  ? "Bridge to Destination"
+                  : "Bridge Back to Source"}
               </h3>
               <ArrowRightLeft
                 className="w-8 h-8 text-[#FF7777] cursor-pointer"
                 onClick={() => {
-                  console.log("switching...");
-                  if (chainId === 1) {
-                    switchChain({ chainId: 8453 });
+                  if (chainId === SOURCE_CHAIN) {
+                    switchChain({ chainId: DESTINATION_CHAIN });
                   } else {
-                    switchChain({ chainId: 1 });
+                    switchChain({ chainId: SOURCE_CHAIN });
                   }
                 }}
               />
@@ -122,13 +123,18 @@ const App = () => {
                 disabled={!amountToBridge || parseFloat(amountToBridge) <= 0}
                 className="w-full bg-[#FF7777] hover:bg-[#ff5555] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-lg transition-colors font-semibold"
               >
-                {chainId === 1 ? "Bridge to Base" : "Bridge Back to Ethereum"}
+                {chainId === SOURCE_CHAIN
+                  ? "Bridge to Destination"
+                  : "Bridge Back to Source"}
               </button>
 
               <div className="mt-6 space-y-4">
                 <div className="flex items-center justify-between py-2 px-4 bg-white/20 rounded-lg">
                   <span className="text-gray-600">
-                    Balance on {chainId === 1 ? "Ethereum" : "Base"}
+                    Balance on{" "}
+                    {chainId === SOURCE_CHAIN
+                      ? SOURCE_CHAIN
+                      : DESTINATION_CHAIN}
                   </span>
                   <span className="font-medium text-[#FF7777]">
                     {balance ? formatEther(balance) : "0"} MAG
