@@ -1,11 +1,11 @@
 import { createConfig } from "wagmi";
-import { mainnet, sepolia } from "wagmi/chains";
+import { mainnet, sepolia, base, baseSepolia } from "wagmi/chains";
 import { getDefaultConfig } from "connectkit";
 
 export const config = createConfig(
   getDefaultConfig({
     // Your dApps chains
-    chains: [mainnet, sepolia],
+    chains: [mainnet, base, sepolia, baseSepolia],
 
     // Required API Keys
     walletConnectProjectId: "",

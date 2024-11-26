@@ -1,76 +1,26 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { formatEther } from "viem";
-//import { useReadContract } from "wagmi";
+import { useAccount, useDisconnect, useChainId, useSwitchChain } from "wagmi";
 import { Coins, ArrowRightLeft } from "lucide-react";
-//import { magTokenABI } from "../contracts/magToken";
-//import { useBridge } from "../hooks/useBridge"; // Assuming you have a hook for bridge operations
 import { ConnectKitButton } from "connectkit";
+import { useMagToken } from "./hooks/useMag";
+//import { useBridge } from "../hooks/useBridge"; // Assuming you have a hook for bridge operations
 
-interface BridgeProps {
-  isConnected: boolean;
-  address?: string;
-}
+const App = () => {
+  // Wagmi hooks
+  const { address, isConnected } = useAccount();
+  const { disconnect } = useDisconnect();
+  const { switchChain } = useSwitchChain();
+  const chainId = useChainId();
 
-const App = ({ isConnected, address }: BridgeProps) => {
-  /*
-  const {
-    bridgeTokens, // Function to bridge tokens from source to destination
-    unbridgeTokens, // Function to bridge tokens back to the source
-    sourceBalance,
-    destinationBalance,
-    fetchSourceBalance,
-    fetchDestinationBalance,
-  } = useBridge(address); */
+  // MAG token hooks
+  const { balance, useAllowance, handleApprove } = useMagToken(
+    address,
+    chainId,
+  );
 
+  // MAG bridge hooks
   const [amountToBridge, setAmountToBridge] = useState("");
-  const [direction, setDirection] = useState<"toDest" | "toSource">("toDest");
-  const sourceBalance = BigInt(10);
-  const destinationBalance = BigInt(50);
-  /*
-  useEffect(() => {
-    if (isConnected && address) {
-      fetchSourceBalance();
-      fetchDestinationBalance();
-    }
-  }, [isConnected, address, fetchSourceBalance, fetchDestinationBalance]);
-
-  const handleBridge = useCallback(async () => {
-    if (
-      !amountToBridge ||
-      isNaN(parseFloat(amountToBridge)) ||
-      parseFloat(amountToBridge) <= 0
-    )
-      return;
-
-    try {
-      if (direction === "toDest") {
-        await bridgeTokens(parseEther(amountToBridge));
-        console.info("Tokens bridged to destination chain");
-      } else {
-        await unbridgeTokens(parseEther(amountToBridge));
-        console.info("Tokens bridged back to source chain");
-      }
-      setAmountToBridge("");
-    } catch (error) {
-      console.error("Failed to bridge tokens:", error);
-    }
-  }, [amountToBridge, bridgeTokens, unbridgeTokens, direction]);
-
-
-  */
-
-  const handleDirectionChange = () => {
-    setDirection((prev) => (prev === "toDest" ? "toSource" : "toDest"));
-  };
-
-  const handleMaxAmount = useCallback(() => {
-    if (direction === "toDest" && sourceBalance) {
-      setAmountToBridge(formatEther(sourceBalance));
-    } else if (destinationBalance) {
-      setAmountToBridge(formatEther(destinationBalance));
-    }
-  }, [direction, sourceBalance, destinationBalance]);
-
   const handleBridge = () => {
     console.log("bridging..");
   };
@@ -89,7 +39,7 @@ const App = ({ isConnected, address }: BridgeProps) => {
               {address?.slice(0, 6)}...{address?.slice(-4)}
             </span>
             <button
-              onClick={() => {}} // Placeholder for disconnect function
+              onClick={() => disconnect()} // Placeholder for disconnect function
               className="bg-[#FF7777] hover:bg-[#ff5555] text-white px-4 py-2 rounded-lg transition-colors"
             >
               Disconnect
@@ -124,13 +74,18 @@ const App = ({ isConnected, address }: BridgeProps) => {
           <div className="bg-white/30 backdrop-blur-lg rounded-2xl p-8 border border-[#FF7777]/20 transition-all duration-300 shadow-xl">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-semibold text-gray-800">
-                {direction === "toDest"
-                  ? "Bridge to Base"
-                  : "Bridge Back to Ethereum"}
+                {chainId === 1 ? "Bridge to Base" : "Bridge Back to Ethereum"}
               </h3>
               <ArrowRightLeft
                 className="w-8 h-8 text-[#FF7777] cursor-pointer"
-                onClick={handleDirectionChange}
+                onClick={() => {
+                  console.log("switching...");
+                  if (chainId === 1) {
+                    switchChain({ chainId: 8453 });
+                  } else {
+                    switchChain({ chainId: 1 });
+                  }
+                }}
               />
             </div>
 
@@ -152,7 +107,7 @@ const App = ({ isConnected, address }: BridgeProps) => {
                     className="w-full bg-white/50 border border-[#FF7777]/20 rounded-lg px-4 py-3 focus:outline-none focus:border-[#FF7777] text-gray-800"
                   />
                   <button
-                    onClick={handleMaxAmount}
+                    onClick={() => setAmountToBridge(formatEther(balance))}
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-[#FF7777] hover:text-[#ff5555] font-medium"
                   >
                     MAX
@@ -165,25 +120,14 @@ const App = ({ isConnected, address }: BridgeProps) => {
                 disabled={!amountToBridge || parseFloat(amountToBridge) <= 0}
                 className="w-full bg-[#FF7777] hover:bg-[#ff5555] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-lg transition-colors font-semibold"
               >
-                {direction === "toDest"
-                  ? "Bridge to Base"
-                  : "Bridge Back to Ethereum"}
+                {chainId === 1 ? "Bridge to Base" : "Bridge Back to Ethereum"}
               </button>
 
               <div className="mt-6 space-y-4">
                 <div className="flex items-center justify-between py-2 px-4 bg-white/20 rounded-lg">
                   <span className="text-gray-600">Source Chain Balance</span>
                   <span className="font-medium text-[#FF7777]">
-                    {sourceBalance ? formatEther(sourceBalance) : "0"} MAG
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-2 px-4 bg-white/20 rounded-lg">
-                  <span className="text-gray-600">
-                    Destination Chain Balance
-                  </span>
-                  <span className="font-medium text-[#FF7777]">
-                    {destinationBalance ? formatEther(destinationBalance) : "0"}{" "}
-                    MAG
+                    {balance ? formatEther(balance) : "0"} MAG
                   </span>
                 </div>
               </div>
