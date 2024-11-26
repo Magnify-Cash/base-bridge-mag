@@ -59,9 +59,15 @@ const config: HardhatUserConfig = {
             url: process.env.RPC_URL_SEPOLIA || 'https://rpc.sepolia.org/',
             accounts,
             oftAdapter: {
-                tokenAddress: '0x0', // Set the token address for the OFT adapter
+                tokenAddress: '0x341DB579E6A62831d608Cbfa5aCc6349579Ba0f1', // Set the token address for the OFT adapter
             },
         },
+        'base-testnet': {
+            eid: EndpointId.BASE_TESTNET,
+            url: process.env.RPC_URL_BASE_TESTNET || 'https://sepolia.base.org',
+            accounts,
+        },
+        /*
         'avalanche-testnet': {
             eid: EndpointId.AVALANCHE_V2_TESTNET,
             url: process.env.RPC_URL_FUJI || 'https://rpc.ankr.com/avalanche_fuji',
@@ -76,6 +82,7 @@ const config: HardhatUserConfig = {
             // Need this for testing because TestHelperOz5.sol is exceeding the compiled contract size limit
             allowUnlimitedContractSize: true,
         },
+        */
     },
     namedAccounts: {
         deployer: {
