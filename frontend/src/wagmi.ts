@@ -1,22 +1,27 @@
-import { http, createConfig } from 'wagmi'
-import { mainnet, sepolia } from 'wagmi/chains'
-import { coinbaseWallet, injected, walletConnect } from 'wagmi/connectors'
+import { createConfig } from "wagmi";
+import { mainnet, sepolia } from "wagmi/chains";
+import { getDefaultConfig } from "connectkit";
 
-export const config = createConfig({
-  chains: [mainnet, sepolia],
-  connectors: [
-    injected(),
-    coinbaseWallet(),
-    walletConnect({ projectId: import.meta.env.VITE_WC_PROJECT_ID }),
-  ],
-  transports: {
-    [mainnet.id]: http(),
-    [sepolia.id]: http(),
-  },
-})
+export const config = createConfig(
+  getDefaultConfig({
+    // Your dApps chains
+    chains: [mainnet, sepolia],
 
-declare module 'wagmi' {
+    // Required API Keys
+    walletConnectProjectId: "",
+
+    // Required App Info
+    appName: "Magnify.Cash Bridge",
+
+    // Optional App Info
+    appDescription: "Mag Cash Bridge",
+    appUrl: "https://family.co", // your app's url
+    appIcon: "https://family.co/logo.png", // your app's icon, no bigger than 1024x1024px (max. 1MB)
+  }),
+);
+
+declare module "wagmi" {
   interface Register {
-    config: typeof config
+    config: typeof config;
   }
 }
