@@ -5,7 +5,7 @@ import { Coins, ArrowRightLeft } from "lucide-react";
 import { ConnectKitButton } from "connectkit";
 import { useMagToken } from "./hooks/useMag";
 import { useBridge } from "./hooks/useBridge";
-import { SOURCE_CHAIN, DESTINATION_CHAIN } from "./constants";
+import { SOURCE_CHAIN, DESTINATION_CHAIN, BRIDGE_ADDRESS } from "./constants";
 
 const App = () => {
   // Wagmi hooks
@@ -26,6 +26,11 @@ const App = () => {
     address,
     chainId,
   );
+
+  const handleBridge = async () => {
+    await handleApprove(amountToBridge, BRIDGE_ADDRESS);
+    await bridgeTokens(amountToBridge);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#2DFFF9] via-[#DAEFFF] to-[#FF7777] text-gray-800">
@@ -119,7 +124,7 @@ const App = () => {
               </div>
 
               <button
-                onClick={() => bridgeTokens(amountToBridge)}
+                onClick={() => handleBridge()}
                 disabled={!amountToBridge || parseFloat(amountToBridge) <= 0}
                 className="w-full bg-[#FF7777] hover:bg-[#ff5555] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-lg transition-colors font-semibold"
               >

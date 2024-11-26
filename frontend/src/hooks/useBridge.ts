@@ -23,6 +23,7 @@ export function useBridge(address?: string, chainId?: number) {
         minAmountLD: parseEther("0.9"),
         composeMsg: "0x",
         oftCmd: "0x",
+        extraOptions: "0x",
       },
       false, // Not using LZ token for fee
     ],
@@ -50,6 +51,7 @@ export function useBridge(address?: string, chainId?: number) {
             minAmountLD: parseEther(amount),
             composeMsg: "0x",
             oftCmd: "0x",
+            extraOptions: "0x",
           },
           {
             nativeFee: 0,
