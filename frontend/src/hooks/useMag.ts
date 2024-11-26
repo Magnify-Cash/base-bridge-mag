@@ -17,7 +17,6 @@ export function useMagToken(address?: string, chainId?: number) {
   // Select the appropriate token address based on the chainId passed as an argument
   const MAG_TOKEN_ADDRESS =
     chainId === SOURCE_CHAIN ? SOURCE_TOKEN_ADDRESS : DESTINATION_TOKEN_ADDRESS;
-  console.log(MAG_TOKEN_ADDRESS);
 
   // Balance of Token
   const { data: balance } = useReadContract({
