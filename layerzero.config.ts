@@ -32,6 +32,11 @@ const amoyContract: OmniPointHardhat = {
     contractName: 'MagOFT',
 }
 
+const baseSepContract: OmniPointHardhat = {
+    eid: EndpointId.BASESEP_V2_TESTNET,
+    contractName: 'MagOFT',
+}
+
 const config: OAppOmniGraphHardhat = {
     contracts: [
         {
@@ -42,6 +47,9 @@ const config: OAppOmniGraphHardhat = {
         },
         {
             contract: amoyContract,
+        },
+        {
+            contract: baseSepContract,
         },
     ],
     connections: [
