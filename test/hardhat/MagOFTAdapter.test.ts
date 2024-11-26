@@ -5,21 +5,21 @@ import { deployments, ethers } from 'hardhat'
 
 import { Options } from '@layerzerolabs/lz-v2-utilities'
 
-describe('MyOFTAdapter Test', function () {
+describe('MagOFTAdapter Test', function () {
     // Constant representing a mock Endpoint ID for testing purposes
     const eidA = 1
     const eidB = 2
     // Declaration of variables to be used in the test suite
-    let MyOFTAdapter: ContractFactory
-    let MyOFT: ContractFactory
+    let MagOFTAdapter: ContractFactory
+    let MagOFT: ContractFactory
     let ERC20Mock: ContractFactory
     let EndpointV2Mock: ContractFactory
     let ownerA: SignerWithAddress
     let ownerB: SignerWithAddress
     let endpointOwner: SignerWithAddress
     let token: Contract
-    let myOFTAdapter: Contract
-    let myOFTB: Contract
+    let magOFTAdapter: Contract
+    let magOFTB: Contract
     let mockEndpointV2A: Contract
     let mockEndpointV2B: Contract
 
@@ -28,11 +28,11 @@ describe('MyOFTAdapter Test', function () {
         // Contract factory for our tested contract
         //
         // We are using a derived contract that exposes a mint() function for testing purposes
-        MyOFTAdapter = await ethers.getContractFactory('MyOFTAdapterMock')
+        MagOFTAdapter = await ethers.getContractFactory('MagOFTAdapterMock')
 
-        MyOFT = await ethers.getContractFactory('MyOFTMock')
+        MagOFT = await ethers.getContractFactory('MagOFTMock')
 
-        ERC20Mock = await ethers.getContractFactory('MyERC20Mock')
+        ERC20Mock = await ethers.getContractFactory('MagERC20Mock')
 
         // Fetching the first three signers (accounts) from Hardhat's local Ethereum network
         const signers = await ethers.getSigners()
@@ -58,22 +58,22 @@ describe('MyOFTAdapter Test', function () {
 
         token = await ERC20Mock.deploy('Token', 'TOKEN')
 
-        // Deploying two instances of MyOFT contract with different identifiers and linking them to the mock LZEndpoint
-        myOFTAdapter = await MyOFTAdapter.deploy(token.address, mockEndpointV2A.address, ownerA.address)
-        myOFTB = await MyOFT.deploy('bOFT', 'bOFT', mockEndpointV2B.address, ownerB.address)
+        // Deploying two instances of MagOFT contract with different identifiers and linking them to the mock LZEndpoint
+        magOFTAdapter = await MagOFTAdapter.deploy(token.address, mockEndpointV2A.address, ownerA.address)
+        magOFTB = await MagOFT.deploy('bOFT', 'bOFT', mockEndpointV2B.address, ownerB.address)
 
-        // Setting destination endpoints in the LZEndpoint mock for each MyOFT instance
-        await mockEndpointV2A.setDestLzEndpoint(myOFTB.address, mockEndpointV2B.address)
-        await mockEndpointV2B.setDestLzEndpoint(myOFTAdapter.address, mockEndpointV2A.address)
+        // Setting destination endpoints in the LZEndpoint mock for each MagOFT instance
+        await mockEndpointV2A.setDestLzEndpoint(magOFTB.address, mockEndpointV2B.address)
+        await mockEndpointV2B.setDestLzEndpoint(magOFTAdapter.address, mockEndpointV2A.address)
 
-        // Setting each MyOFT instance as a peer of the other in the mock LZEndpoint
-        await myOFTAdapter.connect(ownerA).setPeer(eidB, ethers.utils.zeroPad(myOFTB.address, 32))
-        await myOFTB.connect(ownerB).setPeer(eidA, ethers.utils.zeroPad(myOFTAdapter.address, 32))
+        // Setting each MagOFT instance as a peer of the other in the mock LZEndpoint
+        await magOFTAdapter.connect(ownerA).setPeer(eidB, ethers.utils.zeroPad(magOFTB.address, 32))
+        await magOFTB.connect(ownerB).setPeer(eidA, ethers.utils.zeroPad(magOFTAdapter.address, 32))
     })
 
     // A test case to verify token transfer functionality
     it('should send a token from A address to B address via OFTAdapter/OFT', async function () {
-        // Minting an initial amount of tokens to ownerA's address in the myOFTA contract
+        // Minting an initial amount of tokens to ownerA's address in the magOFTA contract
         const initialAmount = ethers.utils.parseEther('100')
         await token.mint(ownerA.address, initialAmount)
 
@@ -94,18 +94,18 @@ describe('MyOFTAdapter Test', function () {
         ]
 
         // Fetching the native fee for the token send operation
-        const [nativeFee] = await myOFTAdapter.quoteSend(sendParam, false)
+        const [nativeFee] = await magOFTAdapter.quoteSend(sendParam, false)
 
-        // Approving the native fee to be spent by the myOFTA contract
-        await token.connect(ownerA).approve(myOFTAdapter.address, tokensToSend)
+        // Approving the native fee to be spent by the magOFTA contract
+        await token.connect(ownerA).approve(magOFTAdapter.address, tokensToSend)
 
-        // Executing the send operation from myOFTA contract
-        await myOFTAdapter.send(sendParam, [nativeFee, 0], ownerA.address, { value: nativeFee })
+        // Executing the send operation from magOFTA contract
+        await magOFTAdapter.send(sendParam, [nativeFee, 0], ownerA.address, { value: nativeFee })
 
         // Fetching the final token balances of ownerA and ownerB
         const finalBalanceA = await token.balanceOf(ownerA.address)
-        const finalBalanceAdapter = await token.balanceOf(myOFTAdapter.address)
-        const finalBalanceB = await myOFTB.balanceOf(ownerB.address)
+        const finalBalanceAdapter = await token.balanceOf(magOFTAdapter.address)
+        const finalBalanceB = await magOFTB.balanceOf(ownerB.address)
 
         // Asserting that the final balances are as expected after the send operation
         expect(finalBalanceA).eql(initialAmount.sub(tokensToSend))
