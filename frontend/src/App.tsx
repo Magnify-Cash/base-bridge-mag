@@ -4,6 +4,7 @@ import { useAccount, useDisconnect, useChainId, useSwitchChain } from "wagmi";
 import { Coins, ArrowRightLeft } from "lucide-react";
 import { ConnectKitButton } from "connectkit";
 import { useMagToken } from "./hooks/useMag";
+import { useBridge } from "./hooks/useBridge";
 //import { useBridge } from "../hooks/useBridge"; // Assuming you have a hook for bridge operations
 
 const App = () => {
@@ -21,9 +22,10 @@ const App = () => {
 
   // MAG bridge hooks
   const [amountToBridge, setAmountToBridge] = useState("");
-  const handleBridge = () => {
-    console.log("bridging..");
-  };
+  const { bridgeFee, bridgeTokens, unbridgeTokens } = useBridge(
+    address,
+    chainId,
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#2DFFF9] via-[#DAEFFF] to-[#FF7777] text-gray-800">
@@ -116,7 +118,7 @@ const App = () => {
               </div>
 
               <button
-                onClick={handleBridge}
+                onClick={() => bridgeTokens(amountToBridge)}
                 disabled={!amountToBridge || parseFloat(amountToBridge) <= 0}
                 className="w-full bg-[#FF7777] hover:bg-[#ff5555] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-lg transition-colors font-semibold"
               >
@@ -125,7 +127,9 @@ const App = () => {
 
               <div className="mt-6 space-y-4">
                 <div className="flex items-center justify-between py-2 px-4 bg-white/20 rounded-lg">
-                  <span className="text-gray-600">Source Chain Balance</span>
+                  <span className="text-gray-600">
+                    Balance on {chainId === 1 ? "Ethereum" : "Base"}
+                  </span>
                   <span className="font-medium text-[#FF7777]">
                     {balance ? formatEther(balance) : "0"} MAG
                   </span>
