@@ -1599,4 +1599,4 @@ export const magOFTABI = [
     stateMutability: "nonpayable",
     type: "function",
   },
-];
+] as const;

@@ -1460,7 +1460,7 @@
     "@types/babel__core" "^7.20.5"
     react-refresh "^0.14.2"
 
-"@wagmi/cli@latest":
+"@wagmi/cli@^2.1.18":
   version "2.1.18"
   resolved "https://registry.yarnpkg.com/@wagmi/cli/-/cli-2.1.18.tgz#d10ddd7a3517a723b48714538e1585c66dff029f"
   integrity sha512-1Vqz3Kj0WY/p6vUq1a2m8NH+64wAcoV+fUC8j5BrEgaeCDbQrWdZ2nMLbz/I6ao2oPNvv1eNWCjR6r8QiscXlA==

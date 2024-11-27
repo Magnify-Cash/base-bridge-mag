@@ -1286,4 +1286,4 @@ export const magAdapterABI = [
     stateMutability: "nonpayable",
     type: "function",
   },
-];
+] as const;

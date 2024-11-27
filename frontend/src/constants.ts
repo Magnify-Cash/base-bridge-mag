@@ -14,10 +14,8 @@ export const getEid = (chainId: number) => {
       return EndpointId.SEPOLIA_V2_TESTNET;
     case 84532:
       return EndpointId.BASESEP_V2_TESTNET;
-    case 1:
-      return;
     default:
-      return;
+      return 0;
   }
 };
 export const getDestinationEid = (chainId: number) => {

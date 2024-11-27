@@ -1,10 +1,5 @@
 import { useState } from "react";
-import {
-  useAccount,
-  useChainId,
-  useSwitchChain,
-  useSimulateContract,
-} from "wagmi";
+import { useAccount, useChainId, useSwitchChain } from "wagmi";
 import {
   SOURCE_CHAIN,
   DESTINATION_CHAIN,
@@ -12,6 +7,7 @@ import {
   LZ_OPTIONS,
   getDestinationEid,
 } from "./constants";
+import { useSimulateMagOftAdapterSend } from "./generated";
 import { formatEther, parseEther, pad } from "viem";
 import { ArrowRightLeft } from "lucide-react";
 import { useMagToken } from "./hooks/useMag";
@@ -35,10 +31,8 @@ export const Bridge = () => {
     await bridgeTokens(amountToBridge);
   };
   const paddedAddress = pad(address as `0x${string}`, { size: 32 });
-  const result = useSimulateContract({
+  const result = useSimulateMagOftAdapterSend({
     address: BRIDGE_ADDRESS,
-    abi: magAdapterABI,
-    functionName: "send",
     args: [
       {
         dstEid: getDestinationEid(chainId),
@@ -50,10 +44,10 @@ export const Bridge = () => {
         extraOptions: LZ_OPTIONS,
       },
       {
-        nativeFee: bridgeFee?.nativeFee || 0,
-        lzTokenFee: 0,
+        nativeFee: bridgeFee?.nativeFee || BigInt(0),
+        lzTokenFee: BigInt(0),
       },
-      address,
+      address as `0x${string}`,
     ],
   });
   console.log(result);

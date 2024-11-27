@@ -1,6 +1,8 @@
-import { useReadContract, useWriteContract } from "wagmi";
-import { parseEther, zeroAddress, pad } from "viem";
-import { magAdapterABI } from "../abi/magAdapterABI";
+import {
+  useReadMagOftAdapterQuoteSend,
+  useWriteMagOftAdapterSend,
+} from "../generated";
+import { parseEther, pad } from "viem";
 import { BRIDGE_ADDRESS, LZ_OPTIONS, getDestinationEid } from "../constants";
 
 /**
@@ -9,13 +11,12 @@ import { BRIDGE_ADDRESS, LZ_OPTIONS, getDestinationEid } from "../constants";
  * @param chainId - The current chain ID (e.g., 1 for Ethereum, 8453 for Base)
  * @returns Object containing token operations and data
  */
-export function useBridge(address?: string, chainId?: number) {
+export function useBridge(address: `0x${string}`, chainId: number) {
   // Estimate bridge fee
-  const paddedAddress = pad(address as `0x${string}`, { size: 32 });
-  const { data: bridgeFee } = useReadContract({
+  const paddedAddress = pad(address, { size: 32 });
+  // Use the generated ERC-20 "balanceOf" hook
+  const { data: bridgeFee } = useReadMagOftAdapterQuoteSend({
     address: BRIDGE_ADDRESS,
-    abi: magAdapterABI,
-    functionName: "quoteSend",
     args: [
       {
         dstEid: getDestinationEid(chainId),
@@ -31,15 +32,13 @@ export function useBridge(address?: string, chainId?: number) {
   });
 
   // Function to bridge tokens to another chain
-  const { writeContractAsync: sendOFT } = useWriteContract();
+  const { writeContractAsync: sendOFT } = useWriteMagOftAdapterSend();
   const bridgeTokens = async (amount: string) => {
     console.info("[useBridge] Initiating bridge:", { amount });
     const paddedAddress = pad(address as `0x${string}`, { size: 32 });
     try {
       const result = await sendOFT({
         address: BRIDGE_ADDRESS,
-        abi: magAdapterABI,
-        functionName: "send",
         args: [
           {
             dstEid: getDestinationEid(chainId),
@@ -51,10 +50,10 @@ export function useBridge(address?: string, chainId?: number) {
             extraOptions: LZ_OPTIONS,
           },
           {
-            nativeFee: bridgeFee?.nativeFee,
-            lzTokenFee: 0,
+            nativeFee: bridgeFee?.nativeFee || BigInt(0),
+            lzTokenFee: BigInt(0),
           },
-          address || zeroAddress, // refund address, using user address or zero address if null
+          address,
         ],
       });
       console.info("[useBridge] Bridge tokens successful", result);
@@ -65,8 +64,5 @@ export function useBridge(address?: string, chainId?: number) {
     }
   };
 
-  // Since the ABI doesn't explicitly show an unbridge function, we assume the send function works for both directions
-  const unbridgeTokens = bridgeTokens;
-
-  return { bridgeFee, bridgeTokens, unbridgeTokens };
+  return { bridgeFee, bridgeTokens };
 }
