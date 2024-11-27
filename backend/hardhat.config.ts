@@ -67,6 +67,10 @@ const config: HardhatUserConfig = {
             url: process.env.RPC_URL_BASE_TESTNET || 'https://sepolia.base.org',
             accounts,
         },
+        hardhat: {
+            // Need this for testing because TestHelperOz5.sol is exceeding the compiled contract size limit
+            allowUnlimitedContractSize: true,
+        },
         /*
         'avalanche-testnet': {
             eid: EndpointId.AVALANCHE_V2_TESTNET,
@@ -78,10 +82,7 @@ const config: HardhatUserConfig = {
             url: process.env.RPC_URL_AMOY || 'https://polygon-amoy-bor-rpc.publicnode.com',
             accounts,
         },
-        hardhat: {
-            // Need this for testing because TestHelperOz5.sol is exceeding the compiled contract size limit
-            allowUnlimitedContractSize: true,
-        },
+
         */
     },
     namedAccounts: {
