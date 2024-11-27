@@ -5,7 +5,13 @@ import {
   useSwitchChain,
   useSimulateContract,
 } from "wagmi";
-import { SOURCE_CHAIN, DESTINATION_CHAIN, BRIDGE_ADDRESS } from "./constants";
+import {
+  SOURCE_CHAIN,
+  DESTINATION_CHAIN,
+  BRIDGE_ADDRESS,
+  LZ_OPTIONS,
+  getDestinationEid,
+} from "./constants";
 import { formatEther, parseEther, pad } from "viem";
 import { ArrowRightLeft } from "lucide-react";
 import { useMagToken } from "./hooks/useMag";
@@ -23,7 +29,7 @@ export const Bridge = () => {
 
   // MAG bridge hooks
   const [amountToBridge, setAmountToBridge] = useState("");
-  const { bridgeTokens } = useBridge(address, chainId);
+  const { bridgeTokens, bridgeFee } = useBridge(address, chainId);
   const handleBridge = async () => {
     await handleApprove(amountToBridge, BRIDGE_ADDRESS);
     await bridgeTokens(amountToBridge);
@@ -35,23 +41,22 @@ export const Bridge = () => {
     functionName: "send",
     args: [
       {
-        dstEid: chainId === SOURCE_CHAIN ? DESTINATION_CHAIN : SOURCE_CHAIN,
+        dstEid: getDestinationEid(chainId),
         to: paddedAddress,
         amountLD: parseEther(amountToBridge),
         minAmountLD: parseEther(amountToBridge),
         composeMsg: "0x",
         oftCmd: "0x",
-        extraOptions: "0x",
+        extraOptions: LZ_OPTIONS,
       },
       {
-        nativeFee: 0,
+        nativeFee: bridgeFee?.nativeFee || 0,
         lzTokenFee: 0,
       },
       address,
     ],
   });
   console.log(result);
-  console.log(result?.failureReason?.message);
 
   return (
     <main className="container mx-auto px-6 py-12">

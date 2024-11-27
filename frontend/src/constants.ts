@@ -1,3 +1,5 @@
+import { EndpointId } from "@layerzerolabs/lz-definitions";
+
 export const SOURCE_CHAIN = 11155111;
 export const DESTINATION_CHAIN = 84532;
 export const BRIDGE_ADDRESS = "0x14378084BA3Fa1CdB032836AdBA1517154c52CF7";
@@ -5,3 +7,23 @@ export const SOURCE_TOKEN_ADDRESS =
   "0x341DB579E6A62831d608Cbfa5aCc6349579Ba0f1";
 export const DESTINATION_TOKEN_ADDRESS =
   "0xd70212BA8531a642079c477D976A4A27a0C8A708";
+export const LZ_OPTIONS = "0x00030100110100000000000000000000000000030d40";
+export const getEid = (chainId: number) => {
+  switch (chainId) {
+    case 11155111:
+      return EndpointId.SEPOLIA_V2_TESTNET;
+    case 84532:
+      return EndpointId.BASESEP_V2_TESTNET;
+    case 1:
+      return;
+    default:
+      return;
+  }
+};
+export const getDestinationEid = (chainId: number) => {
+  if (chainId === SOURCE_CHAIN) {
+    return getEid(DESTINATION_CHAIN);
+  } else {
+    return getEid(SOURCE_CHAIN);
+  }
+};

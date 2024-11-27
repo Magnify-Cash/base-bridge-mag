@@ -1,7 +1,7 @@
 import { useReadContract, useWriteContract } from "wagmi";
 import { parseEther, zeroAddress, pad } from "viem";
 import { magAdapterABI } from "../abi/magAdapterABI";
-import { SOURCE_CHAIN, DESTINATION_CHAIN, BRIDGE_ADDRESS } from "../constants";
+import { BRIDGE_ADDRESS, LZ_OPTIONS, getDestinationEid } from "../constants";
 
 /**
  * Custom hook for managing OFT token operations
@@ -18,13 +18,13 @@ export function useBridge(address?: string, chainId?: number) {
     functionName: "quoteSend",
     args: [
       {
-        dstEid: chainId === SOURCE_CHAIN ? DESTINATION_CHAIN : SOURCE_CHAIN,
+        dstEid: getDestinationEid(chainId),
         to: paddedAddress,
         amountLD: parseEther("1"), // Example amount, adjust as needed
         minAmountLD: parseEther("0.9"),
         composeMsg: "0x",
         oftCmd: "0x",
-        extraOptions: "0x",
+        extraOptions: LZ_OPTIONS,
       },
       false, // Not using LZ token for fee
     ],
@@ -42,16 +42,16 @@ export function useBridge(address?: string, chainId?: number) {
         functionName: "send",
         args: [
           {
-            dstEid: chainId === SOURCE_CHAIN ? DESTINATION_CHAIN : SOURCE_CHAIN,
+            dstEid: getDestinationEid(chainId),
             to: paddedAddress,
             amountLD: parseEther(amount),
             minAmountLD: parseEther(amount),
             composeMsg: "0x",
             oftCmd: "0x",
-            extraOptions: "0x",
+            extraOptions: LZ_OPTIONS,
           },
           {
-            nativeFee: 0,
+            nativeFee: bridgeFee?.nativeFee,
             lzTokenFee: 0,
           },
           address || zeroAddress, // refund address, using user address or zero address if null
