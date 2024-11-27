@@ -1,57 +1,36 @@
 import { useState } from "react";
-import { useAccount, useChainId, useSwitchChain } from "wagmi";
+import { useChainId, useSwitchChain } from "wagmi";
 import {
   SOURCE_CHAIN,
   DESTINATION_CHAIN,
   BRIDGE_ADDRESS,
-  LZ_OPTIONS,
-  getDestinationEid,
   getChainName,
 } from "./constants";
-import { useSimulateMagOftAdapterSend } from "./generated";
-import { formatEther, parseEther, pad } from "viem";
+import { formatEther } from "viem";
 import { ArrowRightLeft } from "lucide-react";
 import { useMagToken } from "./hooks/useMag";
 import { useBridge } from "./hooks/useBridge";
-import { magAdapterABI } from "./abi/magAdapterABI";
 
-export const Bridge = () => {
+export const Bridge = ({ address }: { address: `0x${string}` }) => {
   // Wagmi hooks
-  const { address } = useAccount();
-  const { switchChain } = useSwitchChain();
   const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
 
   // MAG token hooks
   const { balance, handleApprove } = useMagToken(address, chainId);
 
   // MAG bridge hooks
-  const [amountToBridge, setAmountToBridge] = useState("");
-  const { bridgeTokens, bridgeFee } = useBridge(address, chainId);
+  const [amountToBridge, setAmountToBridge] = useState("0");
+  const { bridgeTokens, bridgeFee } = useBridge(
+    address,
+    chainId,
+    amountToBridge,
+  );
   const handleBridge = async () => {
+    console.log(bridgeFee);
     await handleApprove(amountToBridge, BRIDGE_ADDRESS);
-    await bridgeTokens(amountToBridge);
+    await bridgeTokens(bridgeFee);
   };
-  const paddedAddress = pad(address as `0x${string}`, { size: 32 });
-  const result = useSimulateMagOftAdapterSend({
-    address: BRIDGE_ADDRESS,
-    args: [
-      {
-        dstEid: getDestinationEid(chainId),
-        to: paddedAddress,
-        amountLD: parseEther(amountToBridge),
-        minAmountLD: parseEther(amountToBridge),
-        composeMsg: "0x",
-        oftCmd: "0x",
-        extraOptions: LZ_OPTIONS,
-      },
-      {
-        nativeFee: bridgeFee?.nativeFee || BigInt(0),
-        lzTokenFee: BigInt(0),
-      },
-      address as `0x${string}`,
-    ],
-  });
-  console.log(result);
 
   return (
     <main className="container mx-auto px-6 py-12">
@@ -117,8 +96,8 @@ export const Bridge = () => {
               className="w-full bg-[#FF7777] hover:bg-[#ff5555] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-lg transition-colors font-semibold"
             >
               {chainId === SOURCE_CHAIN
-                ? "Bridge to Destination"
-                : "Bridge Back to Source"}
+                ? `Bridge to ${getChainName(DESTINATION_CHAIN)}`
+                : `Bridge to ${getChainName(SOURCE_CHAIN)}`}
             </button>
 
             <div className="mt-6 space-y-4">

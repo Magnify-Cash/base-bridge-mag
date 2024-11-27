@@ -44,7 +44,7 @@ const App = () => {
         )}
       </nav>
       {isConnected ? (
-        <Bridge />
+        <Bridge address={address} />
       ) : (
         <main className="container mx-auto px-6 py-12">
           <div className="text-center mb-16">
