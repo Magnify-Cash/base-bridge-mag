@@ -15,17 +15,11 @@ const App = () => {
   const chainId = useChainId();
 
   // MAG token hooks
-  const { balance, useAllowance, handleApprove } = useMagToken(
-    address,
-    chainId,
-  );
+  const { balance, handleApprove } = useMagToken(address, chainId);
 
   // MAG bridge hooks
   const [amountToBridge, setAmountToBridge] = useState("");
-  const { bridgeFee, bridgeTokens, unbridgeTokens } = useBridge(
-    address,
-    chainId,
-  );
+  const { bridgeTokens } = useBridge(address, chainId);
 
   const handleBridge = async () => {
     await handleApprove(amountToBridge, BRIDGE_ADDRESS);
@@ -115,7 +109,9 @@ const App = () => {
                     className="w-full bg-white/50 border border-[#FF7777]/20 rounded-lg px-4 py-3 focus:outline-none focus:border-[#FF7777] text-gray-800"
                   />
                   <button
-                    onClick={() => setAmountToBridge(formatEther(balance))}
+                    onClick={() =>
+                      setAmountToBridge(formatEther(balance as bigint))
+                    }
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-[#FF7777] hover:text-[#ff5555] font-medium"
                   >
                     MAX

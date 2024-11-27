@@ -11,6 +11,7 @@ import { SOURCE_CHAIN, DESTINATION_CHAIN, BRIDGE_ADDRESS } from "../constants";
  */
 export function useBridge(address?: string, chainId?: number) {
   // Estimate bridge fee
+  const paddedAddress = pad(address as `0x${string}`, { size: 32 });
   const { data: bridgeFee } = useReadContract({
     address: BRIDGE_ADDRESS,
     abi: magAdapterABI,
@@ -18,7 +19,7 @@ export function useBridge(address?: string, chainId?: number) {
     args: [
       {
         dstEid: chainId === SOURCE_CHAIN ? DESTINATION_CHAIN : SOURCE_CHAIN,
-        to: address ? pad(address, { size: 32 }) : zeroAddress,
+        to: paddedAddress,
         amountLD: parseEther("1"), // Example amount, adjust as needed
         minAmountLD: parseEther("0.9"),
         composeMsg: "0x",
@@ -27,17 +28,13 @@ export function useBridge(address?: string, chainId?: number) {
       },
       false, // Not using LZ token for fee
     ],
-    enabled: !!address && !!chainId,
-    onError: (error) => {
-      console.error("[useBridge] Failed to estimate bridge fee:", error);
-    },
   });
 
   // Function to bridge tokens to another chain
   const { writeContractAsync: sendOFT } = useWriteContract();
   const bridgeTokens = async (amount: string) => {
     console.info("[useBridge] Initiating bridge:", { amount });
-    const paddedAddress = pad(address, { size: 32 });
+    const paddedAddress = pad(address as `0x${string}`, { size: 32 });
     try {
       const result = await sendOFT({
         address: BRIDGE_ADDRESS,

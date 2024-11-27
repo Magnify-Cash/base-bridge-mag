@@ -24,10 +24,6 @@ export function useMagToken(address?: string, chainId?: number) {
     abi: magTokenABI,
     functionName: "balanceOf",
     args: [address as `0x${string}`],
-    enabled: !!address,
-    onError: (error) => {
-      console.error("[useMagToken] Failed to fetch balance:", error);
-    },
   });
 
   // Get Token Allowance
@@ -40,9 +36,6 @@ export function useMagToken(address?: string, chainId?: number) {
       abi: magTokenABI,
       functionName: "allowance",
       args: [ownerAddress, spenderAddress],
-      onError: (error) => {
-        console.error("[useMagToken] Failed to fetch allowance:", error);
-      },
     });
     return { allowance, error };
   };
