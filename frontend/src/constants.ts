@@ -25,3 +25,17 @@ export const getDestinationEid = (chainId: number) => {
     return getEid(SOURCE_CHAIN);
   }
 };
+export const getChainName = (chainId: number) => {
+  switch (chainId) {
+    case 11155111:
+      return "Sepolia";
+    case 84532:
+      return "Base Sepolia";
+    case 8453:
+      return "Base";
+    case 1:
+      return "Ethereum";
+    default:
+      return "";
+  }
+};

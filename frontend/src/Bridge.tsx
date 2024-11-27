@@ -6,6 +6,7 @@ import {
   BRIDGE_ADDRESS,
   LZ_OPTIONS,
   getDestinationEid,
+  getChainName,
 } from "./constants";
 import { useSimulateMagOftAdapterSend } from "./generated";
 import { formatEther, parseEther, pad } from "viem";
@@ -67,8 +68,8 @@ export const Bridge = () => {
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-semibold text-gray-800">
               {chainId === SOURCE_CHAIN
-                ? "Bridge to Destination"
-                : "Bridge Back to Source"}
+                ? `Bridge to ${getChainName(DESTINATION_CHAIN)}`
+                : `Bridge to ${getChainName(SOURCE_CHAIN)}`}
             </h3>
             <ArrowRightLeft
               className="w-8 h-8 text-[#FF7777] cursor-pointer"
@@ -124,7 +125,9 @@ export const Bridge = () => {
               <div className="flex items-center justify-between py-2 px-4 bg-white/20 rounded-lg">
                 <span className="text-gray-600">
                   Balance on{" "}
-                  {chainId === SOURCE_CHAIN ? SOURCE_CHAIN : DESTINATION_CHAIN}
+                  {chainId === SOURCE_CHAIN
+                    ? `${getChainName(SOURCE_CHAIN)}`
+                    : `${getChainName(DESTINATION_CHAIN)}`}
                 </span>
                 <span className="font-medium text-[#FF7777]">
                   {balance ? formatEther(balance) : "0"} MAG
