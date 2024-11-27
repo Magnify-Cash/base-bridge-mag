@@ -1,10 +1,16 @@
 import { useState } from "react";
-import { useAccount, useChainId, useSwitchChain } from "wagmi";
+import {
+  useAccount,
+  useChainId,
+  useSwitchChain,
+  useSimulateContract,
+} from "wagmi";
+import { SOURCE_CHAIN, DESTINATION_CHAIN, BRIDGE_ADDRESS } from "./constants";
+import { formatEther, parseEther, pad } from "viem";
+import { ArrowRightLeft } from "lucide-react";
 import { useMagToken } from "./hooks/useMag";
 import { useBridge } from "./hooks/useBridge";
-import { SOURCE_CHAIN, DESTINATION_CHAIN, BRIDGE_ADDRESS } from "./constants";
-import { formatEther } from "viem";
-import { ArrowRightLeft } from "lucide-react";
+import { magAdapterABI } from "./abi/magAdapterABI";
 
 export const Bridge = () => {
   // Wagmi hooks
@@ -18,11 +24,34 @@ export const Bridge = () => {
   // MAG bridge hooks
   const [amountToBridge, setAmountToBridge] = useState("");
   const { bridgeTokens } = useBridge(address, chainId);
-
   const handleBridge = async () => {
     await handleApprove(amountToBridge, BRIDGE_ADDRESS);
     await bridgeTokens(amountToBridge);
   };
+  const paddedAddress = pad(address as `0x${string}`, { size: 32 });
+  const result = useSimulateContract({
+    address: BRIDGE_ADDRESS,
+    abi: magAdapterABI,
+    functionName: "send",
+    args: [
+      {
+        dstEid: chainId === SOURCE_CHAIN ? DESTINATION_CHAIN : SOURCE_CHAIN,
+        to: paddedAddress,
+        amountLD: parseEther(amountToBridge),
+        minAmountLD: parseEther(amountToBridge),
+        composeMsg: "0x",
+        oftCmd: "0x",
+        extraOptions: "0x",
+      },
+      {
+        nativeFee: 0,
+        lzTokenFee: 0,
+      },
+      address,
+    ],
+  });
+  console.log(result);
+
   return (
     <main className="container mx-auto px-6 py-12">
       <div className="text-center mb-16">
