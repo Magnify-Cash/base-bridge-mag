@@ -6,7 +6,7 @@ import {
   BRIDGE_ADDRESS,
   getChainName,
 } from "./constants";
-import { formatEther } from "viem";
+import { formatEther, parseEther } from "viem";
 import { ArrowRightLeft } from "lucide-react";
 import { useMagToken } from "./hooks/useMag";
 import { useBridge } from "./hooks/useBridge";
@@ -17,7 +17,11 @@ export const Bridge = ({ address }: { address: `0x${string}` }) => {
   const { switchChain } = useSwitchChain();
 
   // MAG token hooks
-  const { balance, handleApprove } = useMagToken(address, chainId);
+  const { balance, handleApprove, useAllowance } = useMagToken(
+    address,
+    chainId,
+  );
+  const allowance = useAllowance(address, BRIDGE_ADDRESS);
 
   // MAG bridge hooks
   const [amountToBridge, setAmountToBridge] = useState("0");
@@ -27,8 +31,6 @@ export const Bridge = ({ address }: { address: `0x${string}` }) => {
     amountToBridge,
   );
   const handleBridge = async () => {
-    console.log(bridgeFee);
-    await handleApprove(amountToBridge, BRIDGE_ADDRESS);
     await bridgeTokens(bridgeFee);
   };
 
@@ -91,13 +93,19 @@ export const Bridge = ({ address }: { address: `0x${string}` }) => {
             </div>
 
             <button
-              onClick={() => handleBridge()}
+              onClick={
+                allowance.allowance === BigInt(0) ||
+                allowance.allowance < parseEther(amountToBridge)
+                  ? () => handleApprove(amountToBridge, BRIDGE_ADDRESS)
+                  : () => handleBridge()
+              }
               disabled={!amountToBridge || parseFloat(amountToBridge) <= 0}
               className="w-full bg-[#FF7777] hover:bg-[#ff5555] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-lg transition-colors font-semibold"
             >
-              {chainId === SOURCE_CHAIN
-                ? `Bridge to ${getChainName(DESTINATION_CHAIN)}`
-                : `Bridge to ${getChainName(SOURCE_CHAIN)}`}
+              {allowance.allowance === BigInt(0) ||
+              allowance.allowance < parseEther(amountToBridge)
+                ? "Approve Tokens"
+                : `Bridge to ${getChainName(chainId === SOURCE_CHAIN ? DESTINATION_CHAIN : SOURCE_CHAIN)}`}
             </button>
 
             <div className="mt-6 space-y-4">
