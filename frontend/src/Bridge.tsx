@@ -51,6 +51,7 @@ export const Bridge = () => {
     ],
   });
   console.log(result);
+  console.log(result?.failureReason?.message);
 
   return (
     <main className="container mx-auto px-6 py-12">
