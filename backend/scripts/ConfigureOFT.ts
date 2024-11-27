@@ -1,4 +1,5 @@
 // deploy.js
+/*
 import { EndpointId } from '@layerzerolabs/lz-definitions'
 
 const hre = require('hardhat')
@@ -38,3 +39,4 @@ main()
         console.error(error)
         process.exit(1)
     })
+*/
