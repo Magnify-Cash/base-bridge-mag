@@ -8,6 +8,7 @@ import {
 import { formatEther, parseEther } from "viem";
 import { useMagToken } from "./hooks/useMag";
 import { useBridge } from "./hooks/useBridge";
+import { useMagOft } from "./hooks/useOFT";
 import { useWaitForTransactionReceipt } from "wagmi";
 
 export const Bridge = ({
@@ -18,7 +19,10 @@ export const Bridge = ({
   chainId: number;
 }) => {
   // MAG token hooks
-  const { balance, handleApprove, useAllowance } = useMagToken(address);
+  const { balance, handleApprove, useAllowance } = useMagToken(
+    address,
+    chainId,
+  );
   const { allowance, refetchAllowance } = useAllowance(address, BRIDGE_ADDRESS);
   const approve = async () => {
     setIsApproving(true);
@@ -35,20 +39,29 @@ export const Bridge = ({
     }
   };
 
-  // MAG bridge hooks
+  // MAG bridge & OFT hooks
   const [amountToBridge, setAmountToBridge] = useState("0");
   const { bridgeTokens, bridgeFee } = useBridge(
     address,
     chainId,
     amountToBridge,
   );
+  const { bridgeTokensBack } = useMagOft(address, chainId, amountToBridge);
   const bridge = async () => {
     setIsBridging(true);
     try {
-      const bridgeTxHash = await bridgeTokens(bridgeFee);
-      setTxHash(bridgeTxHash);
+      let bridgeTxHash;
+      if (chainId === SOURCE_CHAIN) {
+        // Use the bridge tokens function for moving tokens from source to destination
+        bridgeTxHash = await bridgeTokens(bridgeFee);
+        setTxHash(bridgeTxHash);
+      } else if (chainId === DESTINATION_CHAIN) {
+        // Use the bridge tokens back function for moving tokens back to the source
+        bridgeTxHash = await bridgeTokensBack();
+        setTxHash(bridgeTxHash);
+      }
     } catch (error) {
-      console.error("Bridge failed:", error);
+      console.error("Bridge operation failed:", error);
     } finally {
       setIsBridging(false);
     }
@@ -99,28 +112,45 @@ export const Bridge = ({
           </button>
         </div>
       </div>
-
-      <button
-        onClick={
-          allowance === BigInt(0) || allowance < parseEther(amountToBridge)
-            ? approve
-            : bridge
-        }
-        disabled={
-          !amountToBridge ||
-          parseFloat(amountToBridge) <= 0 ||
-          isLoading || // Disable during transaction processing
-          isApproving ||
-          isBridging
-        }
-        className="w-full bg-[#FF7777] hover:bg-[#ff5555] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-lg transition-colors font-semibold"
-      >
-        {isLoading
-          ? "Processing..."
-          : allowance === BigInt(0) || allowance < parseEther(amountToBridge)
-            ? "Approve Tokens"
-            : `Bridge to ${getChainName(chainId === SOURCE_CHAIN ? DESTINATION_CHAIN : SOURCE_CHAIN)}`}
-      </button>
+      {chainId === SOURCE_CHAIN ? (
+        <button
+          onClick={
+            allowance === BigInt(0) || allowance < parseEther(amountToBridge)
+              ? approve
+              : bridge
+          }
+          disabled={
+            !amountToBridge ||
+            parseFloat(amountToBridge) <= 0 ||
+            isLoading || // Disable during transaction processing
+            isApproving ||
+            isBridging
+          }
+          className="w-full bg-[#FF7777] hover:bg-[#ff5555] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-lg transition-colors font-semibold"
+        >
+          {isLoading
+            ? "Processing..."
+            : allowance === BigInt(0) || allowance < parseEther(amountToBridge)
+              ? "Approve Tokens"
+              : `Bridge to ${getChainName(chainId === SOURCE_CHAIN ? DESTINATION_CHAIN : SOURCE_CHAIN)}`}
+        </button>
+      ) : (
+        <button
+          onClick={bridge}
+          disabled={
+            !amountToBridge ||
+            parseFloat(amountToBridge) <= 0 ||
+            isLoading || // Disable during transaction processing
+            isApproving ||
+            isBridging
+          }
+          className="w-full bg-[#FF7777] hover:bg-[#ff5555] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-lg transition-colors font-semibold"
+        >
+          {isLoading
+            ? "Processing..."
+            : `Bridge to ${getChainName(SOURCE_CHAIN)}`}
+        </button>
+      )}
 
       {isError && (
         <p className="text-red-500">Transaction failed. Please try again.</p>
