@@ -64,6 +64,7 @@ export function useBridge(
         value: _bridgeFee?.nativeFee,
       });
       console.info("[useBridge] Bridge tokens successful", result);
+      return result;
     } catch (error) {
       window.alert(error);
       console.error("[useBridge] Failed to bridge tokens:", error);

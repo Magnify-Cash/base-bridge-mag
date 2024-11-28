@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useChainId, useSwitchChain } from "wagmi";
 import {
   SOURCE_CHAIN,
@@ -10,6 +10,7 @@ import { formatEther, parseEther } from "viem";
 import { ArrowRightLeft } from "lucide-react";
 import { useMagToken } from "./hooks/useMag";
 import { useBridge } from "./hooks/useBridge";
+import { useWaitForTransactionReceipt } from "wagmi";
 
 export const Bridge = ({ address }: { address: `0x${string}` }) => {
   // Wagmi hooks
@@ -21,7 +22,21 @@ export const Bridge = ({ address }: { address: `0x${string}` }) => {
     address,
     chainId,
   );
-  const allowance = useAllowance(address, BRIDGE_ADDRESS);
+  const { allowance, refetchAllowance } = useAllowance(address, BRIDGE_ADDRESS);
+  const approve = async () => {
+    setIsApproving(true);
+    try {
+      const approvalTxHash = await handleApprove(
+        amountToBridge,
+        BRIDGE_ADDRESS,
+      );
+      setTxHash(approvalTxHash);
+    } catch (error) {
+      console.error("Approval failed:", error);
+    } finally {
+      setIsApproving(false);
+    }
+  };
 
   // MAG bridge hooks
   const [amountToBridge, setAmountToBridge] = useState("0");
@@ -30,9 +45,36 @@ export const Bridge = ({ address }: { address: `0x${string}` }) => {
     chainId,
     amountToBridge,
   );
-  const handleBridge = async () => {
-    await bridgeTokens(bridgeFee);
+  const bridge = async () => {
+    setIsBridging(true);
+    try {
+      const bridgeTxHash = await bridgeTokens(bridgeFee);
+      setTxHash(bridgeTxHash);
+    } catch (error) {
+      console.error("Bridge failed:", error);
+    } finally {
+      setIsBridging(false);
+    }
   };
+
+  // State & hooks for managing transaction hash and loading states
+  const [txHash, setTxHash] = useState<`0x${string}` | null>(null);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isBridging, setIsBridging] = useState(false);
+  const { data, isSuccess, isLoading, isError } = useWaitForTransactionReceipt({
+    hash: txHash,
+    enabled: !!txHash,
+    onSuccess: () => {
+      refetchAllowance();
+    },
+    onReplaced: (replacement) =>
+      console.log("Transaction replaced:", replacement),
+  });
+  useEffect(() => {
+    if (isSuccess) {
+      refetchAllowance();
+    }
+  }, [isSuccess, refetchAllowance]);
 
   return (
     <main className="container mx-auto px-6 py-12">
@@ -94,19 +136,36 @@ export const Bridge = ({ address }: { address: `0x${string}` }) => {
 
             <button
               onClick={
-                allowance.allowance === BigInt(0) ||
-                allowance.allowance < parseEther(amountToBridge)
-                  ? () => handleApprove(amountToBridge, BRIDGE_ADDRESS)
-                  : () => handleBridge()
+                allowance === BigInt(0) ||
+                allowance < parseEther(amountToBridge)
+                  ? approve
+                  : bridge
               }
-              disabled={!amountToBridge || parseFloat(amountToBridge) <= 0}
+              disabled={
+                !amountToBridge ||
+                parseFloat(amountToBridge) <= 0 ||
+                isLoading || // Disable during transaction processing
+                isApproving ||
+                isBridging
+              }
               className="w-full bg-[#FF7777] hover:bg-[#ff5555] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-lg transition-colors font-semibold"
             >
-              {allowance.allowance === BigInt(0) ||
-              allowance.allowance < parseEther(amountToBridge)
-                ? "Approve Tokens"
-                : `Bridge to ${getChainName(chainId === SOURCE_CHAIN ? DESTINATION_CHAIN : SOURCE_CHAIN)}`}
+              {isLoading
+                ? "Processing..."
+                : allowance === BigInt(0) ||
+                    allowance < parseEther(amountToBridge)
+                  ? "Approve Tokens"
+                  : `Bridge to ${getChainName(chainId === SOURCE_CHAIN ? DESTINATION_CHAIN : SOURCE_CHAIN)}`}
             </button>
+
+            {isError && (
+              <p className="text-red-500">
+                Transaction failed. Please try again.
+              </p>
+            )}
+            {isSuccess && data && (
+              <p className="text-green-500">Transaction successful!</p>
+            )}
 
             <div className="mt-6 space-y-4">
               <div className="flex items-center justify-between py-2 px-4 bg-white/20 rounded-lg">

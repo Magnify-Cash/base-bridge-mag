@@ -31,26 +31,31 @@ export function useMagToken(address?: string, chainId?: number) {
     ownerAddress: `0x${string}`,
     spenderAddress: `0x${string}`,
   ) => {
-    const { data: allowance, error } = useReadContract({
+    const {
+      data: allowance,
+      error,
+      refetch: refetchAllowance,
+    } = useReadContract({
       address: MAG_TOKEN_ADDRESS,
       abi: magTokenABI,
       functionName: "allowance",
       args: [ownerAddress, spenderAddress],
     });
-    return { allowance, error };
+    return { allowance, error, refetchAllowance };
   };
 
   // Approve Token
   const { writeContractAsync: approve } = useWriteContract();
   const handleApprove = async (amount: string, spender: `0x${string}`) => {
     try {
-      await approve({
+      let result = await approve({
         address: MAG_TOKEN_ADDRESS,
         abi: magTokenABI,
         functionName: "approve",
         args: [spender, parseEther(amount)],
       });
       console.info("[useMagToken] Approve successful");
+      return result;
     } catch (error) {
       window.alert(error);
       console.error("[useMagToken] Approve failed:", error);
