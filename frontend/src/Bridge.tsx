@@ -31,7 +31,7 @@ export const Bridge = ({
         amountToBridge,
         BRIDGE_ADDRESS,
       );
-      setTxHash(approvalTxHash);
+      setTxHash(approvalTxHash as string);
     } catch (error) {
       console.error("Approval failed:", error);
     } finally {
@@ -54,11 +54,11 @@ export const Bridge = ({
       if (chainId === SOURCE_CHAIN) {
         // Use the bridge tokens function for moving tokens from source to destination
         bridgeTxHash = await bridgeTokens(bridgeFee);
-        setTxHash(bridgeTxHash);
+        setTxHash(`https://layerzeroscan.com/tx/${bridgeTxHash}` as string);
       } else if (chainId === DESTINATION_CHAIN) {
         // Use the bridge tokens back function for moving tokens back to the source
         bridgeTxHash = await bridgeTokensBack();
-        setTxHash(bridgeTxHash);
+        setTxHash(`https://layerzeroscan.com/tx/${bridgeTxHash}` as string);
       }
     } catch (error) {
       console.error("Bridge operation failed:", error);
@@ -68,17 +68,11 @@ export const Bridge = ({
   };
 
   // State & hooks for managing transaction hash and loading states
-  const [txHash, setTxHash] = useState<`0x${string}` | null>(null);
+  const [txHash, setTxHash] = useState<string | null>(null);
   const [isApproving, setIsApproving] = useState(false);
   const [isBridging, setIsBridging] = useState(false);
   const { data, isSuccess, isLoading, isError } = useWaitForTransactionReceipt({
-    hash: txHash,
-    enabled: !!txHash,
-    onSuccess: () => {
-      refetchAllowance();
-    },
-    onReplaced: (replacement) =>
-      console.log("Transaction replaced:", replacement),
+    hash: txHash?.split("/").pop() as `0x${string}`,
   });
   useEffect(() => {
     if (isSuccess) {
@@ -132,7 +126,7 @@ export const Bridge = ({
             ? "Processing..."
             : allowance === BigInt(0) || allowance < parseEther(amountToBridge)
               ? "Approve Tokens"
-              : `Bridge to ${getChainName(chainId === SOURCE_CHAIN ? DESTINATION_CHAIN : SOURCE_CHAIN)}`}
+              : `Bridge to ${getChainName(DESTINATION_CHAIN)}`}
         </button>
       ) : (
         <button
@@ -155,8 +149,17 @@ export const Bridge = ({
       {isError && (
         <p className="text-red-500">Transaction failed. Please try again.</p>
       )}
-      {isSuccess && data && (
-        <p className="text-green-500">Transaction successful!</p>
+      {isSuccess && data && txHash && (
+        <div>
+          <p className="text-green-500">Transaction successful!</p>
+          <a
+            target="_blank"
+            href={txHash}
+            className="underline text-blue-600 hover:text-blue-800 visited:text-purple-600"
+          >
+            Transaction Receipt
+          </a>
+        </div>
       )}
 
       <div className="mt-6 space-y-4">

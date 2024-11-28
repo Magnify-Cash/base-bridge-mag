@@ -62,18 +62,18 @@ export function useMagOft(
             extraOptions: LZ_OPTIONS,
           },
           {
-            nativeFee: bridgeFee?.nativeFee,
+            nativeFee: bridgeFee!.nativeFee,
             lzTokenFee: BigInt(0),
           },
           address,
         ],
         value: bridgeFee?.nativeFee,
       });
-      console.info("[useMagToken] Approve successful");
+      console.info("[useMagToken] Send successful");
       return result;
     } catch (error) {
       window.alert(error);
-      console.error("[useMagToken] Approve failed:", error);
+      console.error("[useMagToken] Send failed:", error);
       throw error;
     }
   };

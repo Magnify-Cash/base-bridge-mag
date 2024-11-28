@@ -3,12 +3,7 @@ import { Coins } from "lucide-react";
 import { ConnectKitButton } from "connectkit";
 import { ArrowRightLeft } from "lucide-react";
 import { Bridge } from "./Bridge";
-import {
-  SOURCE_CHAIN,
-  DESTINATION_CHAIN,
-  BRIDGE_ADDRESS,
-  getChainName,
-} from "./constants";
+import { SOURCE_CHAIN, DESTINATION_CHAIN, getChainName } from "./constants";
 
 const App = () => {
   // Wagmi hooks
