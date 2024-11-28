@@ -18,10 +18,7 @@ export const Bridge = ({
   chainId: number;
 }) => {
   // MAG token hooks
-  const { balance, handleApprove, useAllowance } = useMagToken(
-    address,
-    chainId,
-  );
+  const { balance, handleApprove, useAllowance } = useMagToken(address);
   const { allowance, refetchAllowance } = useAllowance(address, BRIDGE_ADDRESS);
   const approve = async () => {
     setIsApproving(true);
