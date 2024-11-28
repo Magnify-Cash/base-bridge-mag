@@ -107,7 +107,8 @@ export const Bridge = ({
       {chainId === SOURCE_CHAIN ? (
         <button
           onClick={
-            allowance === BigInt(0) || allowance < parseEther(amountToBridge)
+            allowance === BigInt(0) ||
+            (allowance && allowance < parseEther(amountToBridge))
               ? approve
               : bridge
           }
@@ -121,7 +122,8 @@ export const Bridge = ({
         >
           {isApproving || isBridging
             ? "Processing..."
-            : allowance === BigInt(0) || allowance < parseEther(amountToBridge)
+            : allowance === BigInt(0) ||
+                (allowance && allowance < parseEther(amountToBridge))
               ? "Approve Tokens"
               : `Bridge to ${getChainName(DESTINATION_CHAIN)}`}
         </button>
