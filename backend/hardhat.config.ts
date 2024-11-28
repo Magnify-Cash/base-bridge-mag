@@ -9,6 +9,7 @@ import 'hardhat-deploy'
 import 'hardhat-contract-sizer'
 import '@nomiclabs/hardhat-ethers'
 import '@layerzerolabs/toolbox-hardhat'
+import '@nomicfoundation/hardhat-verify'
 import { HardhatUserConfig, HttpNetworkAccountsUserConfig } from 'hardhat/types'
 
 import { EndpointId } from '@layerzerolabs/lz-definitions'
@@ -99,6 +100,15 @@ const config: HardhatUserConfig = {
         },
 
         */
+    },
+    etherscan: {
+        apiKey: {
+            mainnet: process.env.ETHERSCAN_API_KEY,
+            base: process.env.BASE_API_KEY,
+        },
+    },
+    sourcify: {
+        enabled: true,
     },
     namedAccounts: {
         deployer: {
