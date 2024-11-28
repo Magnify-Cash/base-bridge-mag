@@ -1547,6 +1547,40 @@ export const magOftAdapterAbi = [
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// MagToken
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const magTokenAbi = [
+  {
+    type: 'function',
+    inputs: [
+      { name: 'spender', internalType: 'address', type: 'address' },
+      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'approve',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'balanceOf',
+    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'owner', internalType: 'address', type: 'address' },
+      { name: 'spender', internalType: 'address', type: 'address' },
+    ],
+    name: 'allowance',
+    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // React
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2596,4 +2630,58 @@ export const useWatchMagOftAdapterPreCrimeSetEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
     abi: magOftAdapterAbi,
     eventName: 'PreCrimeSet',
+  })
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link magTokenAbi}__
+ */
+export const useReadMagToken = /*#__PURE__*/ createUseReadContract({
+  abi: magTokenAbi,
+})
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link magTokenAbi}__ and `functionName` set to `"balanceOf"`
+ */
+export const useReadMagTokenBalanceOf = /*#__PURE__*/ createUseReadContract({
+  abi: magTokenAbi,
+  functionName: 'balanceOf',
+})
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link magTokenAbi}__ and `functionName` set to `"allowance"`
+ */
+export const useReadMagTokenAllowance = /*#__PURE__*/ createUseReadContract({
+  abi: magTokenAbi,
+  functionName: 'allowance',
+})
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link magTokenAbi}__
+ */
+export const useWriteMagToken = /*#__PURE__*/ createUseWriteContract({
+  abi: magTokenAbi,
+})
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link magTokenAbi}__ and `functionName` set to `"approve"`
+ */
+export const useWriteMagTokenApprove = /*#__PURE__*/ createUseWriteContract({
+  abi: magTokenAbi,
+  functionName: 'approve',
+})
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link magTokenAbi}__
+ */
+export const useSimulateMagToken = /*#__PURE__*/ createUseSimulateContract({
+  abi: magTokenAbi,
+})
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link magTokenAbi}__ and `functionName` set to `"approve"`
+ */
+export const useSimulateMagTokenApprove =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: magTokenAbi,
+    functionName: 'approve',
   })

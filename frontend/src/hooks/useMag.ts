@@ -1,11 +1,6 @@
-import { useReadContract, useWriteContract } from "wagmi";
 import { parseEther } from "viem";
-import { magTokenABI } from "../abi/magTokenABI";
-import {
-  SOURCE_TOKEN_ADDRESS,
-  DESTINATION_TOKEN_ADDRESS,
-  SOURCE_CHAIN,
-} from "../constants";
+import { useReadMagTokenBalanceOf,useReadMagTokenAllowance, useWriteMagTokenApprove } from "../generated";}
+import { SOURCE_TOKEN_ADDRESS } from "../constants";
 
 /**
  * Custom hook for managing token operations with dynamic chain selection
@@ -13,47 +8,27 @@ import {
  * @param chainId - The ID of the chain to use (e.g., 1 for Ethereum, 8453 for Base)
  * @returns Object containing token operations and data
  */
-export function useMagToken(address?: string, chainId?: number) {
-  // Select the appropriate token address based on the chainId passed as an argument
-  const MAG_TOKEN_ADDRESS =
-    chainId === SOURCE_CHAIN ? SOURCE_TOKEN_ADDRESS : DESTINATION_TOKEN_ADDRESS;
-
+export function useMagToken(address?: string) {
   // Balance of Token
-  const { data: balance } = useReadContract({
-    address: MAG_TOKEN_ADDRESS,
-    abi: magTokenABI,
-    functionName: "balanceOf",
+  const { data: balance } = useReadMagTokenBalanceOf({
+    address: SOURCE_TOKEN_ADDRESS,
     args: [address as `0x${string}`],
   });
 
   // Get Token Allowance
-  const useAllowance = (
-    ownerAddress: `0x${string}`,
-    spenderAddress: `0x${string}`,
-  ) => {
-    const {
-      data: allowance,
-      error,
-      refetch: refetchAllowance,
-    } = useReadContract({
-      address: MAG_TOKEN_ADDRESS,
-      abi: magTokenABI,
-      functionName: "allowance",
+  const useAllowance = (ownerAddress: `0x${string}`, spenderAddress: `0x${string}`,) => {
+    const { data: allowance,error,refetch: refetchAllowance } = useReadMagTokenAllowance({
+      address: SOURCE_TOKEN_ADDRESS,
       args: [ownerAddress, spenderAddress],
     });
     return { allowance, error, refetchAllowance };
   };
 
   // Approve Token
-  const { writeContractAsync: approve } = useWriteContract();
+  const { writeContractAsync: approve } = useWriteMagTokenApprove();
   const handleApprove = async (amount: string, spender: `0x${string}`) => {
     try {
-      let result = await approve({
-        address: MAG_TOKEN_ADDRESS,
-        abi: magTokenABI,
-        functionName: "approve",
-        args: [spender, parseEther(amount)],
-      });
+      let result = await approve({address: SOURCE_TOKEN_ADDRESS,args: [spender, parseEther(amount)]});
       console.info("[useMagToken] Approve successful");
       return result;
     } catch (error) {
