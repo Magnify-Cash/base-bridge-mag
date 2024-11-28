@@ -1,12 +1,21 @@
-import { useAccount, useDisconnect } from "wagmi";
+import { useAccount, useDisconnect, useSwitchChain, useChainId } from "wagmi";
 import { Coins } from "lucide-react";
 import { ConnectKitButton } from "connectkit";
+import { ArrowRightLeft } from "lucide-react";
 import { Bridge } from "./Bridge";
+import {
+  SOURCE_CHAIN,
+  DESTINATION_CHAIN,
+  BRIDGE_ADDRESS,
+  getChainName,
+} from "./constants";
 
 const App = () => {
   // Wagmi hooks
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
+  const { switchChain } = useSwitchChain();
+  const chainId = useChainId();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#2DFFF9] via-[#DAEFFF] to-[#FF7777] text-gray-800">
@@ -15,7 +24,6 @@ const App = () => {
           <Coins className="w-8 h-8 text-[#FF7777]" />
           <h1 className="text-2xl font-bold">MAG Token Bridge</h1>
         </div>
-        {/* Assuming you keep the same wallet connection UI */}
         {isConnected ? (
           <div className="flex items-center space-x-4">
             <span className="text-sm bg-white/20 px-3 py-1 rounded-lg">
@@ -43,17 +51,40 @@ const App = () => {
           </ConnectKitButton.Custom>
         )}
       </nav>
-      {isConnected ? (
-        <Bridge address={address} />
-      ) : (
-        <main className="container mx-auto px-6 py-12">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">MAG Token Bridge</h2>
-            <p className="text-gray-700 max-w-2xl mx-auto">
-              Transfer MAG tokens between chains securely and instantly with our
-              cross-chain bridge.
-            </p>
-          </div>
+      <main className="container mx-auto px-6 py-12">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold mb-4">MAG Token Bridge</h2>
+          <p className="text-gray-700 max-w-2xl mx-auto">
+            Transfer MAG tokens between chains securely and instantly with our
+            cross-chain bridge.
+          </p>
+        </div>
+        {isConnected ? (
+          <main className="container mx-auto px-6">
+            <div className="max-w-2xl mx-auto">
+              <div className="bg-white/30 backdrop-blur-lg rounded-2xl p-8 border border-[#FF7777]/20 transition-all duration-300 shadow-xl">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    {chainId === SOURCE_CHAIN
+                      ? `Bridge to ${getChainName(DESTINATION_CHAIN)}`
+                      : `Bridge to ${getChainName(SOURCE_CHAIN)}`}
+                  </h3>
+                  <ArrowRightLeft
+                    className="w-8 h-8 text-[#FF7777] cursor-pointer"
+                    onClick={() => {
+                      if (chainId === SOURCE_CHAIN) {
+                        switchChain({ chainId: DESTINATION_CHAIN });
+                      } else {
+                        switchChain({ chainId: SOURCE_CHAIN });
+                      }
+                    }}
+                  />
+                </div>
+                <Bridge address={address as `0x${string}`} chainId={chainId} />
+              </div>
+            </div>
+          </main>
+        ) : (
           <div className="max-w-2xl mx-auto">
             <div className="bg-white/30 backdrop-blur-lg rounded-2xl p-8 border border-[#FF7777]/20 transition-all duration-300 shadow-xl">
               <div className="flex justify-center items-center mb-6">
@@ -63,8 +94,8 @@ const App = () => {
               </div>
             </div>
           </div>
-        </main>
-      )}
+        )}
+      </main>
       <footer className="text-center py-6 text-gray-600 backdrop-blur-md bg-white/10">
         <p>© 2024 MAG Token Bridge. All rights reserved.</p>
       </footer>
