@@ -14,6 +14,10 @@ export const getEid = (chainId: number) => {
       return EndpointId.SEPOLIA_V2_TESTNET;
     case 84532:
       return EndpointId.BASESEP_V2_TESTNET;
+    case 8453:
+      return EndpointId.ETHEREUM_V2_MAINNET;
+    case 1:
+      return EndpointId.BASE_V2_MAINNET;
     default:
       return 0;
   }

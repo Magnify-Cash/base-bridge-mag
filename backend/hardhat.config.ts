@@ -54,6 +54,20 @@ const config: HardhatUserConfig = {
         ],
     },
     networks: {
+        base: {
+            eid: EndpointId.BASE_V2_MAINNET,
+            url: process.env.RPC_URL_SEPOLIA || 'https://base.llamarpc.com',
+            accounts,
+        },
+        ethereum: {
+            eid: EndpointId.ETHEREUM_V2_MAINNET,
+            url: process.env.RPC_URL_BASE_TESTNET || 'https://eth.llamarpc.com',
+            accounts,
+            oftAdapter: {
+                tokenAddress: '0x71DA932ccdA723BA3ab730C976bC66DaAF9C598c',
+            },
+        },
+        /*
         'sepolia-testnet': {
             eid: EndpointId.SEPOLIA_V2_TESTNET,
             url: process.env.RPC_URL_SEPOLIA || 'https://rpc.sepolia.org/',
@@ -67,6 +81,7 @@ const config: HardhatUserConfig = {
             url: process.env.RPC_URL_BASE_TESTNET || 'https://sepolia.base.org',
             accounts,
         },
+        */
         hardhat: {
             // Need this for testing because TestHelperOz5.sol is exceeding the compiled contract size limit
             allowUnlimitedContractSize: true,
