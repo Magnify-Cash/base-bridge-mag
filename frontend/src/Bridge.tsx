@@ -34,8 +34,6 @@ export const Bridge = ({
       setTxHash(approvalTxHash as string);
     } catch (error) {
       console.error("Approval failed:", error);
-    } finally {
-      setIsApproving(false);
     }
   };
 
@@ -62,8 +60,6 @@ export const Bridge = ({
       }
     } catch (error) {
       console.error("Bridge operation failed:", error);
-    } finally {
-      setIsBridging(false);
     }
   };
 
@@ -71,14 +67,16 @@ export const Bridge = ({
   const [txHash, setTxHash] = useState<string | null>(null);
   const [isApproving, setIsApproving] = useState(false);
   const [isBridging, setIsBridging] = useState(false);
-  const { data, isSuccess, isLoading, isError } = useWaitForTransactionReceipt({
-    hash: txHash?.split("/").pop() as `0x${string}`,
+  const { data, isSuccess, isError } = useWaitForTransactionReceipt({
+    hash: (txHash?.split("/").pop() as `0x${string}`) || "",
   });
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess || isError) {
       refetchAllowance();
+      setIsBridging(false);
+      setIsApproving(false);
     }
-  }, [isSuccess, refetchAllowance]);
+  }, [isSuccess, isError, refetchAllowance]);
 
   return (
     <div className="space-y-4">
@@ -116,13 +114,12 @@ export const Bridge = ({
           disabled={
             !amountToBridge ||
             parseFloat(amountToBridge) <= 0 ||
-            isLoading || // Disable during transaction processing
             isApproving ||
             isBridging
           }
           className="w-full bg-[#FF7777] hover:bg-[#ff5555] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-lg transition-colors font-semibold"
         >
-          {isLoading
+          {isApproving || isBridging
             ? "Processing..."
             : allowance === BigInt(0) || allowance < parseEther(amountToBridge)
               ? "Approve Tokens"
@@ -134,13 +131,12 @@ export const Bridge = ({
           disabled={
             !amountToBridge ||
             parseFloat(amountToBridge) <= 0 ||
-            isLoading || // Disable during transaction processing
             isApproving ||
             isBridging
           }
           className="w-full bg-[#FF7777] hover:bg-[#ff5555] disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-lg transition-colors font-semibold"
         >
-          {isLoading
+          {isApproving || isBridging
             ? "Processing..."
             : `Bridge to ${getChainName(SOURCE_CHAIN)}`}
         </button>
