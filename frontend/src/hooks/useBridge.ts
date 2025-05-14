@@ -23,7 +23,7 @@ export function useBridge(
     address: BRIDGE_ADDRESS,
     args: [
       {
-        dstEid: getDestinationEid(chainId),
+        dstEid: getDestinationEid(chainId, undefined), // Using undefined for backward compatibility
         to: paddedAddress,
         amountLD: parseEther(amountToBridge),
         minAmountLD: parseEther(amountToBridge),
@@ -37,7 +37,7 @@ export function useBridge(
 
   // Function to bridge tokens to another chain
   const { writeContractAsync: sendOFT } = useWriteMagOftAdapterSend();
-  const bridgeTokens = async (_bridgeFee: any) => {
+  const bridgeTokens = async (_bridgeFee: any, destinationChainId?: number) => {
     console.info("[useBridge] Initiating bridge:", {
       amountToBridge,
       _bridgeFee,
@@ -47,7 +47,7 @@ export function useBridge(
         address: BRIDGE_ADDRESS,
         args: [
           {
-            dstEid: getDestinationEid(chainId),
+            dstEid: getDestinationEid(chainId, destinationChainId),
             to: paddedAddress,
             amountLD: parseEther(amountToBridge),
             minAmountLD: parseEther(amountToBridge),

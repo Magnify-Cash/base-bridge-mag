@@ -33,7 +33,7 @@ export function useMagOft(
     address: DESTINATION_TOKEN_ADDRESS,
     args: [
       {
-        dstEid: getDestinationEid(chainId),
+        dstEid: getDestinationEid(chainId, undefined), // Using undefined for backward compatibility
         to: paddedAddress,
         amountLD: parseEther(amount),
         minAmountLD: parseEther(amount),
@@ -47,13 +47,13 @@ export function useMagOft(
 
   // Approve Token
   const { writeContractAsync: send } = useWriteMagOftSend();
-  const bridgeTokensBack = async () => {
+  const bridgeTokensBack = async (destinationChainId?: number) => {
     try {
-      let result = await send({
+      const result = await send({
         address: DESTINATION_TOKEN_ADDRESS,
         args: [
           {
-            dstEid: getDestinationEid(chainId),
+            dstEid: getDestinationEid(chainId, destinationChainId),
             to: paddedAddress,
             amountLD: parseEther(amount),
             minAmountLD: parseEther(amount),

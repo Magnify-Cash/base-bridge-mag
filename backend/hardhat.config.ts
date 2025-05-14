@@ -62,11 +62,19 @@ const config: HardhatUserConfig = {
         },
         ethereum: {
             eid: EndpointId.ETHEREUM_V2_MAINNET,
-            url: process.env.RPC_URL_BASE_TESTNET || 'https://eth.llamarpc.com',
+            url: process.env.RPC_URL_ETHEREUM || 'https://eth.llamarpc.com',
             accounts,
             oftAdapter: {
                 tokenAddress: '0x71DA932ccdA723BA3ab730C976bC66DaAF9C598c',
             },
+        },
+        worldchain: {
+            eid: EndpointId.WORLDCHAIN_V2_MAINNET, // Using WORLDCHAIN endpoint ID from LayerZero
+            url: 
+                process.env.RPC_URL_WORLDCHAIN || 
+                'https://damp-intensive-bird.worldchain-mainnet.quiknode.pro/369ee84d76ee98c1ed6ea7a9fece166d948499cd/',
+            accounts,
+            // No oftAdapter since this is a destination chain like Base
         },
         /*
         'sepolia-testnet': {
@@ -103,8 +111,9 @@ const config: HardhatUserConfig = {
     },
     etherscan: {
         apiKey: {
-            mainnet: process.env.ETHERSCAN_API_KEY,
-            base: process.env.BASE_API_KEY,
+            mainnet: process.env.ETHERSCAN_API_KEY || '',
+            base: process.env.BASE_API_KEY || '',
+            worldchain: process.env.WORLDCHAIN_API_KEY || '',
         },
     },
     sourcify: {
